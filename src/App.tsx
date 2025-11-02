@@ -1,35 +1,63 @@
-import { useState } from 'react'
+import React, { useEffect, useState } from "react";
+import Papa from "papaparse"; // To parse CSV easily
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+const GOOGLE_SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/1CyjtQmDF-phomRdFyUaP3vtr3jfRRIl8FRLxFQCkll0/export?format=csv";
+
 function App() {
-  const [count, setCount] = useState(0)
+ const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(GOOGLE_SHEET_CSV_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch Google Sheet");
+        return response.text();
+      })
+      .then((csvText) => {
+        const parsed = Papa.parse(csvText, { header: true });
+        setData(parsed.data);
+      })
+      .catch((err) => {
+        setError(err.message);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>Loading data from Google Sheet...</p>;
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
+
+  if (!data.length) return <p>No data found.</p>;
+
+  const headers = Object.keys(data[0]);
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="App">
+      <h2>📊 Google Sheet Data</h2>
+      <table>
+        <thead>
+          <tr>
+            {headers.map((header) => (
+              <th key={header}>{header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, i) => (
+            <tr key={i}>
+              {headers.map((header) => (
+                <td key={header}>{row[header]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 export default App
