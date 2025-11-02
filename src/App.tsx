@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Papa from "papaparse"; // To parse CSV easily
 
 import './App.css'
