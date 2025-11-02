@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Papa from "papaparse"; // To parse CSV easily
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
 
 const GOOGLE_SHEET_CSV_URL =
